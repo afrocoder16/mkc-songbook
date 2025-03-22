@@ -32,6 +32,9 @@ import ResetPasswordForm, {
     action as resetPasswordAction,
 } from "./components/reset-password.component.jsx";
 
+//added this to debugg env variables
+console.log("ALL ENV:", import.meta.env);
+
 const router = createBrowserRouter([
     {
         path: "/",

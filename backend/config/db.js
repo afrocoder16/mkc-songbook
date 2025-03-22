@@ -1,3 +1,4 @@
+// db.js (ES module version)
 import mongoose from "mongoose";
 import MediaFileModel from "../models/media-file.model.js";
 import SongModel from "../models/song.model.js";
