@@ -6,23 +6,64 @@ import Bell from "../assets/active-bell.svg?react";
 import heart from "../assets/heart.svg";
 import SearchBar from "./search-bar.component";
 import SearchToggleSvg from "../assets/search-toggle.svg?react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { buttonTheme } from "../config/button-theme.config";
 import { useDispatch, useSelector } from "react-redux";
 import { resetCurrentUser } from "../store/slices/user.slice";
 
+/**
+ * Header Component
+ *
+ * Main navigation component that appears at the top of every page.
+ * Includes:
+ * - Logo and brand name
+ * - Search toggle button
+ * - Notifications dropdown (currently empty)
+ * - User profile dropdown with authentication options
+ * - Navigation links with role-based access control
+ * - Collapsible search bar
+ *
+ * @component
+ * @example
+ * return (
+ *   <Header />
+ * )
+ */
 const Header = () => {
     const { pathname } = useLocation();
     const [searchParams, _setSearchParams] = useSearchParams();
+
+    /**
+     * Controls visibility of the search bar.
+     * Initialized based on presence of search query parameters.
+     */
     const [showSearch, setShowSearch] = useState(
         searchParams.has("q") || searchParams.has("type")
     );
     const dispatch = useDispatch();
 
+    /**
+     * Toggles the visibility of the search bar
+     */
     const toggleSearch = () => setShowSearch((prev) => !prev);
 
+    /**
+     * Current user information from Redux store
+     */
     const user = useSelector((state) => state.user.currentUser);
 
+    /**
+     * Memoized user role for conditional rendering
+     * Defaults to "public" if no user or user has public role
+     */
+    const role = useMemo(() => {
+        if (!user || user.role === "public") return "public";
+        return user.role;
+    }, [user]);
+
+    /**
+     * Handles user logout by clearing Redux store and local storage
+     */
     const handleLogout = () => {
         dispatch(resetCurrentUser());
         localStorage.removeItem("_s");
@@ -123,9 +164,11 @@ const Header = () => {
             </Navbar>
             <Navbar fluid border theme={navbarTheme}>
                 <Navbar.Collapse>
-                    <Navbar.Link as={Link} to="/" active={pathname === "/"}>
-                        Home
-                    </Navbar.Link>
+                    {role !== "admin" && (
+                        <Navbar.Link as={Link} to="/" active={pathname === "/"}>
+                            Home
+                        </Navbar.Link>
+                    )}
                     <Navbar.Link
                         as={Link}
                         to="/songs"
@@ -140,20 +183,42 @@ const Header = () => {
                     >
                         Albums
                     </Navbar.Link>
-                    <Navbar.Link
-                        as={Link}
-                        to="/playlists"
-                        active={pathname.startsWith("/playlists")}
-                    >
-                        Playlists
-                    </Navbar.Link>
-                    <Navbar.Link
-                        as={Link}
-                        to="/schedule"
-                        active={pathname.startsWith("/schedule")}
-                    >
-                        Schedule
-                    </Navbar.Link>
+                    {role !== "admin" && (
+                        <Navbar.Link
+                            as={Link}
+                            to="/playlists"
+                            active={pathname.startsWith("/playlists")}
+                        >
+                            Playlists
+                        </Navbar.Link>
+                    )}
+                    {role !== "public" && (
+                        <Navbar.Link
+                            as={Link}
+                            to="/schedule"
+                            active={pathname.startsWith("/schedule")}
+                        >
+                            Schedule
+                        </Navbar.Link>
+                    )}
+                    {role === "admin" && (
+                        <Navbar.Link
+                            as={Link}
+                            to="/users"
+                            active={pathname.startsWith("/users")}
+                        >
+                            Users
+                        </Navbar.Link>
+                    )}
+                    {role === "admin" && (
+                        <Navbar.Link
+                            as={Link}
+                            to="/announcements"
+                            active={pathname.startsWith("/announcements")}
+                        >
+                            Announcements
+                        </Navbar.Link>
+                    )}
                 </Navbar.Collapse>
             </Navbar>
             <div

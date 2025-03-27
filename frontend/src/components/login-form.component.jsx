@@ -5,6 +5,7 @@ import {
     redirect,
     useActionData,
     useNavigation,
+    useSearchParams,
 } from "react-router-dom";
 import closedEye from "../assets/closed-eye.svg";
 import openEye from "../assets/open-eye.svg";
@@ -14,19 +15,51 @@ import { useState } from "react";
 import { formButtonTheme } from "../config/button-theme.config";
 import GoogleLink from "./google-link.component";
 import { passwordInputTheme } from "../config/forms-theme.config";
-import { TailSpin } from "react-loader-spinner";
 import { login } from "../utils/api/user-api.util";
 import store from "../store/store";
 import { setCurrentUser } from "../store/slices/user.slice";
+import CustomTailSpin from "./custom-tail-spin.component";
 
+/**
+ * Wrapper function for password visibility toggle icon
+ * @param {Function} onClick - Click handler for the icon
+ * @param {string} icon - Path to the eye icon image
+ * @returns {JSX.Element} Icon element with click handler
+ */
 const eyeWrapper = (onClick, icon) => (
     <img className="cursor-pointer" src={icon} onClick={onClick} />
 );
 
+/**
+ * Login Form Component
+ *
+ * Provides user authentication through email/password or Google OAuth.
+ * Features:
+ * - Email and password input fields
+ * - Password visibility toggle
+ * - Forgot password link
+ * - Google OAuth login option
+ * - Form validation and error handling
+ * - Loading states during submission
+ */
 const LoginForm = () => {
     const error = useActionData();
     const navigation = useNavigation();
+    const [searchParams, _setSearchParams] = useSearchParams();
+
+    /**
+     * State for password visibility toggle
+     */
     const [showPass, setShowPass] = useState(false);
+
+    /**
+     * State for Google OAuth login errors
+     */
+    const [googleLoginError, setGoogleLoginError] = useState("");
+
+    /**
+     * Toggles password visibility
+     */
     const toggleShowPass = () => {
         setShowPass((prev) => !prev);
     };
@@ -83,7 +116,7 @@ const LoginForm = () => {
                     </div>
                 </div>
                 <span className="text-sm text-secondary text-center">
-                    {error?.message}
+                    {error?.message || googleLoginError}
                 </span>
                 <div className="flex flex-col gap-2.5">
                     <Button
@@ -92,22 +125,18 @@ const LoginForm = () => {
                         className="bg-secondary focus:ring-0"
                         type="submit"
                         isProcessing={navigation.state === "submitting"}
-                        processingSpinner={
-                            <TailSpin
-                                visible={true}
-                                height="30"
-                                width="30"
-                                color="#FCFDFE"
-                                ariaLabel="tail-spin-loading"
-                                radius="2/"
-                            />
-                        }
+                        processingSpinner={<CustomTailSpin small white />}
                     >
                         Login
                         <img className="ml-2.5" src={loginIcon} alt="" />
                     </Button>
                     <span className="text-center">or</span>
-                    <GoogleLink>Login with Google</GoogleLink>
+                    <GoogleLink
+                        redirectOnSuccess={searchParams.get("redirect")}
+                        setErrorMessage={setGoogleLoginError}
+                    >
+                        Login with Google
+                    </GoogleLink>
                 </div>
                 <span className="text-center">
                     Don't have an account?{" "}
@@ -122,7 +151,17 @@ const LoginForm = () => {
 
 export default LoginForm;
 
+/**
+ * Form action handler for login submission
+ * Processes the login request and handles authentication
+ *
+ * @param {Object} params - Action parameters
+ * @param {Request} params.request - Form submission request
+ * @returns {Object|Response} Redirect on success or error object on failure
+ * @throws {Error} For unexpected server errors
+ */
 export const action = async ({ request }) => {
+    const searchParams = new URL(request.url).searchParams;
     const formData = await request.formData();
     const email = formData.get("email");
     const password = formData.get("password");
@@ -133,7 +172,9 @@ export const action = async ({ request }) => {
             throw { status: 500, message: "An unexpected error occured." };
         localStorage.setItem("_s", data.token);
         store.dispatch(setCurrentUser(data.user));
-        return redirect("/");
+        return redirect(
+            searchParams.get("redirect") ? searchParams.get("redirect") : "/"
+        );
     } catch (error) {
         if (error.status === 400 || error.status === 401)
             return {

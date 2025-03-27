@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Root application component
+ * Handles layout structure and user authentication state
+ */
+
 import { Await, Outlet, defer, useLoaderData } from "react-router-dom";
 import "./App.css";
 import Header from "./components/header.component";
@@ -6,29 +11,24 @@ import store from "./store/store";
 import { getCurrentLoggedInUser } from "./utils/api/user-api.util";
 import { setCurrentUser } from "./store/slices/user.slice";
 import { Suspense } from "react";
-import { TailSpin } from "react-loader-spinner";
-import Cookies from "js-cookie";
+import CustomTailSpin from "./components/custom-tail-spin.component";
+import { useSelector } from "react-redux";
 
+/**
+ * Root application component
+ * Manages the main layout including header and audio player
+ * Handles authentication state and protected routes
+ * @returns {JSX.Element} Root application component
+ */
 function App() {
     const data = useLoaderData();
+    const user = useSelector((state) => state.user.currentUser);
     return (
-        <Suspense
-            fallback={
-                <TailSpin
-                    visible={true}
-                    height="80"
-                    width="80"
-                    color="#C9184A"
-                    ariaLabel="tail-spin-loading"
-                    radius="2"
-                    wrapperClass="flex-1 self-stretch flex justify-center items-center"
-                />
-            }
-        >
+        <Suspense fallback={<CustomTailSpin />}>
             <Await resolve={data?.user}>
                 <Header />
                 <Outlet />
-                <AudioPlayer />
+                {user?.role !== "admin" && <AudioPlayer />}
             </Await>
         </Suspense>
     );
@@ -36,11 +36,14 @@ function App() {
 
 export default App;
 
+/**
+ * Route loader for the root application
+ * Handles user authentication and session management
+ * @returns {Promise<Object|null>} Deferred user data or null if not authenticated
+ * @throws {Error} If an unexpected error occurs during authentication
+ */
 export const loader = async () => {
-    let token = Cookies.get("x-auth-cookie");
-    Cookies.remove("x-auth-cookie");
-    if (token) localStorage.setItem("_s", token);
-    else token = localStorage.getItem("_s");
+    const token = localStorage.getItem("_s");
     if (!token || store.getState().user.currentUser) return null;
     const getUser = async () => {
         try {

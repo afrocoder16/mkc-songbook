@@ -1,33 +1,42 @@
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Table } from "flowbite-react";
+import SongTools from "./song-tools.component";
 
-import OptionsSvg from "../assets/options.svg?react";
-import HeartSvg from "../assets/heart.svg?react";
-import DownloadSvg from "../assets/download.svg?react";
-
+/**
+ * Songs Table Row Component
+ *
+ * A responsive table row component for displaying song information.
+ * Features:
+ * - Clickable row for navigation to song details
+ * - Responsive layout (collapses album info on mobile)
+ * - Song tools integration
+ * - Search parameter preservation
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {Object} props.song - Song data to display
+ * @param {string} props.song._id - Song identifier
+ * @param {string} props.song.title - Song title
+ * @param {Array<{name: string}>} props.song.albums - List of albums the song belongs to
+ * @param {boolean} props.highlight - Whether to include search term in navigation
+ */
 const SongsTableRow = ({ song, highlight }) => {
     const navigate = useNavigate();
-    const location = useLocation();
     const [searchParams, _setSearchParams] = useSearchParams();
+
+    /**
+     * Window width from Redux store for responsive layout decisions
+     */
     const windowWidth = useSelector((state) => state.configs.windowWidth);
 
     return (
         <Table.Row
             onClick={() =>
-                navigate(
-                    {
-                        pathname: song._id.toString(),
-                        search: highlight
-                            ? `?q=${searchParams.get("q")}`
-                            : null,
-                    },
-                    {
-                        state: {
-                            prevLocation: location.pathname + location.search,
-                        },
-                    }
-                )
+                navigate({
+                    pathname: song._id.toString(),
+                    search: highlight ? `?q=${searchParams.get("q")}` : null,
+                })
             }
             key={song._id}
         >
@@ -43,22 +52,8 @@ const SongsTableRow = ({ song, highlight }) => {
                     {song.albums.map((song) => song.name).join(", ")}
                 </Table.Cell>
             )}
-            <Table.Cell className="text-end">
-                <div className="flex gap-7 items-center justify-end">
-                    {windowWidth >= 768 && (
-                        <>
-                            <div>
-                                <HeartSvg className="first:stroke-baseblack first:fill-basewhite hover:first:fill-primary-400 active:first:fill-primary-700 cursor-pointer" />
-                            </div>
-                            <div>
-                                <DownloadSvg className="hover:first:fill-success-200 active:first:fill-success-300 cursor-pointer" />
-                            </div>
-                        </>
-                    )}
-                    <div>
-                        <OptionsSvg className="text-basewhite hover:text-neutrals-400 active:text-baseblack cursor-pointer" />
-                    </div>
-                </div>
+            <Table.Cell className="text-end flex justify-end">
+                <SongTools songId={song._id} />
             </Table.Cell>
         </Table.Row>
     );

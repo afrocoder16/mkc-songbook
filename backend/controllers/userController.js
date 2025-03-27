@@ -1,10 +1,31 @@
+/**
+ * User Controller
+ *
+ * This module handles user-related operations including:
+ * 1. User registration with OTP verification
+ * 2. Google OAuth authentication
+ * 3. Password management
+ * 4. User profile retrieval
+ *
+ * @module userController
+ */
+
 import OTPModel from "../models/otp.model.js";
 import generateOtp from "../utils/otp.util.js";
 import bcrypt from "bcrypt";
 import UserModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
-import { ClientFaultError } from "../utils/error.util.js";
+import { ClientFaultError, UnauthorizedError } from "../utils/error.util.js";
 
+/**
+ * Generate and send OTP for user registration
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body
+ * @param {string} req.body.email - User's email address
+ * @param {Object} res - Express response object
+ * @returns {Promise<void>} Sends JSON response with success status
+ */
 export const registerOTP = async (req, res) => {
     const { email } = req.body;
     let otp = generateOtp();
@@ -17,6 +38,17 @@ export const registerOTP = async (req, res) => {
     res.status(200).json({ success: true });
 };
 
+/**
+ * Verify OTP for user registration
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body
+ * @param {string} req.body.email - User's email address
+ * @param {string|number} req.body.otp - OTP to verify
+ * @param {Object} res - Express response object
+ * @returns {Promise<void>} Sends JSON response with verification status
+ * @throws {ClientFaultError} If OTP is invalid
+ */
 export const verifyOTP = async (req, res) => {
     let { email, otp } = req.body;
     if (typeof otp === "string") otp = parseInt(otp);
@@ -26,6 +58,17 @@ export const verifyOTP = async (req, res) => {
     return res.status(200).json({ success: true });
 };
 
+/**
+ * Register a new user
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body
+ * @param {string} req.body.name - User's name
+ * @param {string} req.body.email - User's email address
+ * @param {string} req.body.password - User's password
+ * @param {Object} res - Express response object
+ * @returns {Promise<void>} Sends JSON response with user data and JWT token
+ */
 export const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -51,6 +94,14 @@ export const registerUser = async (req, res) => {
     await OTPModel.deleteOne({ email });
 };
 
+/**
+ * Get current user's profile
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.user - User object from authentication middleware
+ * @param {Object} res - Express response object
+ * @returns {Promise<void>} Sends JSON response with user profile
+ */
 export const getCurrentUser = async (req, res) => {
     res.status(200).json({
         user: {
@@ -62,15 +113,67 @@ export const getCurrentUser = async (req, res) => {
     });
 };
 
-export const OAuthCreateToken = async (req, res) => {
-    const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, {
+/**
+ * Handle Google OAuth login/registration
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body
+ * @param {string} req.body.accessToken - Google OAuth access token
+ * @param {Object} res - Express response object
+ * @returns {Promise<void>} Sends JSON response with user data and JWT token
+ * @throws {UnauthorizedError} If Google OAuth verification fails
+ */
+export const googleOAuthLogin = async (req, res) => {
+    const { accessToken } = req.body;
+
+    const googleApiResponse = await fetch(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        {
+            headers: { Authorization: `Bearer ${accessToken}` },
+        }
+    );
+
+    if (!googleApiResponse.ok) {
+        throw new UnauthorizedError(
+            "Failed to sign up or login with google. Please, try again."
+        );
+    }
+
+    const googleApiData = await googleApiResponse.json();
+    let user = await UserModel.findOne({ email: googleApiData.email });
+
+    if (!user)
+        user = await UserModel.create({
+            email: googleApiData.email,
+            name: googleApiData.name,
+            photo: googleApiData.picture,
+        });
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
         expiresIn: "30 days",
     });
 
-    res.cookie("x-auth-cookie", token);
-    res.redirect(process.env.CLIENT_URL);
+    res.json({
+        token,
+        user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+        },
+    });
 };
 
+/**
+ * Reset user's password
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body
+ * @param {string} req.body.email - User's email address
+ * @param {string} req.body.password - New password
+ * @param {Object} res - Express response object
+ * @returns {Promise<void>} Sends JSON response with success status
+ */
 export const resetPassword = async (req, res) => {
     const { email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);

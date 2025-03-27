@@ -10,11 +10,17 @@ import { formButtonTheme } from "../config/button-theme.config";
 import nextIcon from "../assets/next-filled.svg";
 import GoogleLink from "./google-link.component";
 import { requestOTP } from "../utils/api/user-api.util";
-import { TailSpin } from "react-loader-spinner";
 import { useSelector } from "react-redux";
 import { setAuthEmail } from "../store/slices/user.slice";
 import store from "../store/store";
+import CustomTailSpin from "./custom-tail-spin.component";
 
+/**
+ * Form component for initiating user signup process
+ * Represents step 1 of the signup flow
+ * Allows users to enter email or sign up with Google
+ * @returns {JSX.Element} Sign up form component
+ */
 const SignUpForm = () => {
     const error = useActionData();
     const navigation = useNavigation();
@@ -52,16 +58,7 @@ const SignUpForm = () => {
                         className="bg-secondary focus:ring-0"
                         type="submit"
                         isProcessing={navigation.state === "submitting"}
-                        processingSpinner={
-                            <TailSpin
-                                visible={true}
-                                height="30"
-                                width="30"
-                                color="#FCFDFE"
-                                ariaLabel="tail-spin-loading"
-                                radius="2"
-                            />
-                        }
+                        processingSpinner={<CustomTailSpin small white />}
                     >
                         Next
                         <img className="ml-2.5" src={nextIcon} alt="" />
@@ -82,6 +79,13 @@ const SignUpForm = () => {
 
 export default SignUpForm;
 
+/**
+ * Action handler for the sign up form submission
+ * Requests an OTP to be sent to the provided email
+ * @param {Object} params - Parameters object containing the request
+ * @param {Request} params.request - Form submission request object
+ * @returns {Promise<Response>} Redirects to verification page on success, returns validation errors otherwise
+ */
 export const action = async ({ request }) => {
     const formData = await request.formData();
     const email = formData.get("email");

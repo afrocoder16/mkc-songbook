@@ -12,15 +12,27 @@ import { passwordInputTheme } from "../config/forms-theme.config";
 import openEye from "../assets/open-eye.svg";
 import closedEye from "../assets/closed-eye.svg";
 import { formButtonTheme } from "../config/button-theme.config";
-import { TailSpin } from "react-loader-spinner";
 import getStarted from "../assets/get-started.svg";
 import store from "../store/store";
 import { resetPassword } from "../utils/api/user-api.util";
+import CustomTailSpin from "./custom-tail-spin.component";
 
+/**
+ * Helper function to wrap eye icon with click handler for password visibility toggle
+ * @param {Function} onClick - Function to handle click event
+ * @param {string} icon - Path to the eye icon image
+ * @returns {JSX.Element} Image element with click handler
+ */
 const eyeWrapper = (onClick, icon) => (
     <img className="cursor-pointer" src={icon} onClick={onClick} />
 );
 
+/**
+ * Form component for resetting user password
+ * Represents step 3 of the password reset flow
+ * Allows users to create and confirm a new password
+ * @returns {JSX.Element} Reset password form component
+ */
 const ResetPasswordForm = () => {
     const navigate = useNavigate();
     const error = useActionData();
@@ -105,16 +117,7 @@ const ResetPasswordForm = () => {
                             className="bg-secondary focus:ring-0"
                             type="submit"
                             isProcessing={navigation.state === "submitting"}
-                            processingSpinner={
-                                <TailSpin
-                                    visible={true}
-                                    height="30"
-                                    width="30"
-                                    color="#FCFDFE"
-                                    ariaLabel="tail-spin-loading"
-                                    radius="2"
-                                />
-                            }
+                            processingSpinner={<CustomTailSpin small white />}
                         >
                             Reset Password
                             <img className="ml-2.5" src={getStarted} alt="" />
@@ -128,6 +131,13 @@ const ResetPasswordForm = () => {
 
 export default ResetPasswordForm;
 
+/**
+ * Action handler for the reset password form submission
+ * Updates user's password with the new password
+ * @param {Object} params - Parameters object containing the request
+ * @param {Request} params.request - Form submission request object
+ * @returns {Promise<Response>} Redirects to login on success, returns validation errors otherwise
+ */
 export const action = async ({ request }) => {
     const formData = await request.formData();
     const password = formData.get("password");
