@@ -5,84 +5,115 @@ import orange from "../assets/orange.svg";
 import red from "../assets/red.svg";
 
 const SchedulePage = () => {
-	return (
-		<MainBodyContainer title={"Schedule"}>
-			<p className="self-stretch font-normal text-[18px] leading-[1.2] text-inherit">
-				View your choir presentation schedule here. It updates automatically
-				with the latest changes.
-			</p>
+  return (
+    <MainBodyContainer title="Schedule">
+      {/* Intro Text */}
+      <p className="mb-4 text-base text-gray-700">
+        View your choir presentation schedule here. It updates automatically with the latest changes.
+      </p>
 
-			<div className="w-screen h-screen overflow-x-auto">
-				<Table hoverable>
-					<Table.Body className="divide-y">
-						<Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-							<Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-								16
-							</Table.Cell>
+      {/* Responsive Table Container */}
+      <div className="w-full overflow-x-auto">
+        <Table hoverable className="min-w-[600px]">
+          {/* Table Header */}
+          <Table.Head>
+            <Table.HeadCell className="font-semibold text-gray-700">
+              Day
+            </Table.HeadCell>
+            <Table.HeadCell className="font-semibold text-gray-700">
+              Date
+            </Table.HeadCell>
+            <Table.HeadCell className="font-semibold text-gray-700">
+              Time
+            </Table.HeadCell>
+            <Table.HeadCell className="font-semibold text-gray-700">
+              Church
+            </Table.HeadCell>
+            <Table.HeadCell className="font-semibold text-gray-700">
+              Status
+            </Table.HeadCell>
+          </Table.Head>
 
-							<Table.Cell>Aug, Friday</Table.Cell>
-							<Table.Cell>8 - 10am</Table.Cell>
-							<Table.Cell>Hiwot Berhan Church</Table.Cell>
-							<Table.Cell></Table.Cell>
-						</Table.Row>
-						<Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-							<Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-								17
-							</Table.Cell>
-							<Table.Cell>Aug, Friday</Table.Cell>
-							<Table.Cell>8 - 10am</Table.Cell>
-							<Table.Cell>Hiwot Berhan Church</Table.Cell>
-							<Table.Cell></Table.Cell>
-						</Table.Row>
-						<Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-							<Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-								18
-							</Table.Cell>
-							<Table.Cell>Aug, Friday</Table.Cell>
-							<Table.Cell>8 - 10am</Table.Cell>
-							<Table.Cell>Hiwot Berhan Church</Table.Cell>
-							<Table.Cell className="text-green-400 flex">
-								<img src={green} />
-								Recently Added
-							</Table.Cell>
-						</Table.Row>
-						<Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-							<Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-								17
-							</Table.Cell>
-							<Table.Cell>Aug, Friday</Table.Cell>
-							<Table.Cell>8 - 10am</Table.Cell>
-							<Table.Cell>Hiwot Berhan Church</Table.Cell>
-							<Table.Cell className="text-orange-300 flex">
-								<img src={orange} alt="" />
-								Recently Changed
-							</Table.Cell>
-						</Table.Row>
-						<Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-							<Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-								17
-							</Table.Cell>
-							<Table.Cell>Aug, Friday</Table.Cell>
-							<Table.Cell>8 - 10am</Table.Cell>
-							<Table.Cell>Hiwot Berhan Church</Table.Cell>
-							<Table.Cell className="text-red-600 flex">
-								<img src={red} />
-								Cancelled
-							</Table.Cell>
-						</Table.Row>
-						<Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-							<Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-								17
-							</Table.Cell>
-							<Table.Cell>Aug, Friday</Table.Cell>
-							<Table.Cell>8 - 10am</Table.Cell>
-							<Table.Cell>Hiwot Berhan Church</Table.Cell>
-							<Table.Cell></Table.Cell>
-						</Table.Row>
-					</Table.Body>
-				</Table>
-			</div>
-		</MainBodyContainer>
-	);
+          {/* Table Body */}
+          <Table.Body className="divide-y">
+            {/* Row 1 */}
+            <Table.Row className="bg-white">
+              <Table.Cell className="whitespace-nowrap font-medium text-gray-900">
+                16
+              </Table.Cell>
+              <Table.Cell>Aug, Friday</Table.Cell>
+              <Table.Cell>8 - 10am</Table.Cell>
+              <Table.Cell>Hiwot Berhan Church</Table.Cell>
+              <Table.Cell>
+                {/* Empty Status */}
+              </Table.Cell>
+            </Table.Row>
+
+            {/* Row 2 */}
+            <Table.Row className="bg-white">
+              <Table.Cell className="whitespace-nowrap font-medium text-gray-900">
+                17
+              </Table.Cell>
+              <Table.Cell>Aug, Friday</Table.Cell>
+              <Table.Cell>8 - 10am</Table.Cell>
+              <Table.Cell>Hiwot Berhan Church</Table.Cell>
+              <Table.Cell>
+                {/* Empty Status */}
+              </Table.Cell>
+            </Table.Row>
+
+            {/* Row 3: Recently Added */}
+            <Table.Row className="bg-white">
+              <Table.Cell className="whitespace-nowrap font-medium text-gray-900">
+                18
+              </Table.Cell>
+              <Table.Cell>Aug, Friday</Table.Cell>
+              <Table.Cell>8 - 10am</Table.Cell>
+              <Table.Cell>Hiwot Berhan Church</Table.Cell>
+              <Table.Cell>
+                <span className="flex items-center gap-1 text-green-500">
+                  <img src={green} alt="green icon" className="w-4 h-4" />
+                  Recently Added
+                </span>
+              </Table.Cell>
+            </Table.Row>
+
+            {/* Row 4: Recently Changed */}
+            <Table.Row className="bg-white">
+              <Table.Cell className="whitespace-nowrap font-medium text-gray-900">
+                17
+              </Table.Cell>
+              <Table.Cell>Aug, Friday</Table.Cell>
+              <Table.Cell>8 - 10am</Table.Cell>
+              <Table.Cell>Hiwot Berhan Church</Table.Cell>
+              <Table.Cell>
+                <span className="flex items-center gap-1 text-orange-400">
+                  <img src={orange} alt="orange icon" className="w-4 h-4" />
+                  Recently Changed
+                </span>
+              </Table.Cell>
+            </Table.Row>
+
+            {/* Row 5: Cancelled */}
+            <Table.Row className="bg-white">
+              <Table.Cell className="whitespace-nowrap font-medium text-gray-900">
+                17
+              </Table.Cell>
+              <Table.Cell>Aug, Friday</Table.Cell>
+              <Table.Cell>8 - 10am</Table.Cell>
+              <Table.Cell>Hiwot Berhan Church</Table.Cell>
+              <Table.Cell>
+                <span className="flex items-center gap-1 text-red-500">
+                  <img src={red} alt="red icon" className="w-4 h-4" />
+                  Cancelled
+                </span>
+              </Table.Cell>
+            </Table.Row>
+          </Table.Body>
+        </Table>
+      </div>
+    </MainBodyContainer>
+  );
 };
+
 export default SchedulePage;

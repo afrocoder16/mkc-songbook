@@ -49,6 +49,8 @@ import HomePage from "./pages/home.page.jsx";
 import ProtectedRoute from "./components/protected-route.component.jsx";
 import ErrorPage from "./pages/error.page.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import SchedulePage from "./pages/schedule.page.jsx";
+
 
 /**
  * Router configuration
@@ -134,11 +136,7 @@ const router = createBrowserRouter([
             },
             {
                 path: "schedule",
-                element: (
-                    <MainBodyContainer
-                        title={"Under Construction"}
-                    ></MainBodyContainer>
-                ),
+                element: <SchedulePage />,
             },
             {
                 path: "users",
